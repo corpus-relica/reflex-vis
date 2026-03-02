@@ -1,0 +1,22 @@
+/* @corpus-relica/reflex-devtools styles */
+[data-rx-devtools] {
+  --rx-bg: rgba(0, 0, 0, 0.85);
+  --rx-bg-panel: rgba(30, 30, 30, 0.95);
+  --rx-text: #e0e0e0;
+  --rx-text-muted: #888;
+  --rx-accent: #4fc3f7;
+  --rx-accent-dim: #1a3a4a;
+  --rx-border: rgba(255, 255, 255, 0.1);
+  --rx-font-mono: 'SF Mono', 'Fira Code', monospace;
+  --rx-font-ui: -apple-system, sans-serif;
+  --rx-font-size: 11px;
+  --rx-event-node: #64b5f6;
+  --rx-event-bb: #81c784;
+  --rx-event-workflow: #ce93d8;
+  --rx-event-engine: #90a4ae;
+
+  box-sizing: border-box;
+  font-family: var(--rx-font-ui);
+  font-size: var(--rx-font-size);
+  color: var(--rx-text);
+}
