@@ -9,6 +9,8 @@ export interface StackEntry {
   currentNodeId: string;
   depth: number;
   status?: 'completed';
+  order?: number;
+  parentNodeId?: string;
 }
 
 export interface StackPanelEvents {
@@ -23,6 +25,7 @@ export class StackPanel extends Panel {
   private _list: HTMLElement | null = null;
   private _entries: StackEntry[] = [];
   private _completedEntries: StackEntry[] = [];
+  private _orderCounter = 0;
   private _focusedWorkflowId: string | null = null;
 
   constructor(container: HTMLElement, options?: PanelOptions) {
@@ -74,6 +77,7 @@ export class StackPanel extends Panel {
       workflowId: childWorkflow.id,
       currentNodeId: '',
       depth: this._entries.length,
+      parentNodeId: frame.currentNodeId,
     });
     this._render();
   }
@@ -87,7 +91,8 @@ export class StackPanel extends Panel {
     if (this._entries.length > 0) {
       const popped = this._entries.shift()!;
       popped.status = 'completed';
-      this._completedEntries.unshift(popped);
+      popped.order = ++this._orderCounter;
+      this._completedEntries.push(popped);
     }
     if (this._entries.length > 0) {
       this._entries[0].workflowId = parentWorkflow.id;
@@ -96,8 +101,11 @@ export class StackPanel extends Panel {
   }
 
   onEngineComplete(_workflow: Workflow): void {
-    for (const entry of this._entries) entry.status = 'completed';
-    this._completedEntries.unshift(...this._entries);
+    for (const entry of this._entries) {
+      entry.status = 'completed';
+      entry.order = ++this._orderCounter;
+    }
+    this._completedEntries.push(...this._entries);
     this._entries = [];
     this._render();
   }
@@ -109,6 +117,7 @@ export class StackPanel extends Panel {
   resetSession(): void {
     this._entries = [];
     this._completedEntries = [];
+    this._orderCounter = 0;
     this._focusedWorkflowId = null;
     this._render();
   }
@@ -132,7 +141,21 @@ export class StackPanel extends Panel {
     const depthLabel = el('span', { class: className('stack', 'depth') });
     depthLabel.textContent = `[${entry.depth}]`;
 
-    row.append(indicator, wfLabel, nodeLabel, depthLabel);
+    if (completed && entry.order != null) {
+      const orderLabel = el('span', { class: className('stack', 'order') });
+      orderLabel.textContent = `#${entry.order}`;
+      row.append(orderLabel);
+    }
+
+    if (completed && entry.parentNodeId) {
+      const parentLabel = el('span', { class: className('stack', 'parent') });
+      parentLabel.textContent = `\u2190 ${entry.parentNodeId}`;
+      parentLabel.title = entry.parentNodeId;
+      row.append(indicator, wfLabel, nodeLabel, parentLabel, depthLabel);
+    } else {
+      row.append(indicator, wfLabel, nodeLabel, depthLabel);
+    }
+
     row.addEventListener('click', () => {
       this._focusedWorkflowId = entry.workflowId;
       this._render();

@@ -170,6 +170,21 @@
   margin-top: 2px;
 }
 .rx-stack_frame-completed { opacity: 0.5; }
+.rx-stack_order {
+  color: var(--rx-text-muted);
+  flex-shrink: 0;
+  width: 20px;
+  font-size: 9px;
+}
+.rx-stack_parent {
+  color: var(--rx-text-muted);
+  flex-shrink: 0;
+  font-size: 9px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100px;
+}
 
 /* === Blackboard Panel === */
 .rx-bb_toolbar {
@@ -386,6 +401,14 @@
 .rx-dag_node-visited .rx-dag_node-bg {
   fill: rgba(79, 195, 247, 0.08);
   stroke: rgba(79, 195, 247, 0.3);
+}
+.rx-dag_node-invocation.rx-dag_node-visited .rx-dag_node-bg {
+  fill: rgba(206, 147, 216, 0.12);
+  stroke: rgba(206, 147, 216, 0.5);
+  stroke-width: 2;
+}
+.rx-dag_node-invocation.rx-dag_node-visited .rx-dag_node-label {
+  fill: rgba(206, 147, 216, 0.8);
 }
 
 
