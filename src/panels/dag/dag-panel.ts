@@ -6,6 +6,7 @@ import { Emitter } from '../../core/emitter.js';
 import { computeLayout, type LayoutResult } from './dag-layout.js';
 import { DagRenderer } from './dag-renderer.js';
 import { Viewport } from './viewport.js';
+import { Minimap } from './minimap.js';
 
 export interface DagPanelEvents {
   'node-click': { nodeId: string; workflowId: string };
@@ -19,6 +20,7 @@ export class DagPanel extends Panel {
 
   private _renderer: DagRenderer | null = null;
   private _viewport: Viewport | null = null;
+  private _minimap: Minimap | null = null;
   private _currentLayout: LayoutResult | null = null;
   private _currentWorkflowId: string | null = null;
   private _breadcrumb: HTMLElement | null = null;
@@ -40,6 +42,13 @@ export class DagPanel extends Panel {
 
     this._renderer = new DagRenderer(svgContainer);
     this._viewport = new Viewport(this._renderer.svg, this._renderer.contentGroup);
+
+    // Minimap
+    this._minimap = new Minimap(svgContainer, (dx, dy) => this._viewport?.pan(dx, dy));
+    this._viewport.onTransformChange((t) => {
+      this._minimap?.setSvgRect(this._renderer!.svg.getBoundingClientRect());
+      this._minimap?.onTransformChange(t);
+    });
 
     // Node click handler
     this._renderer.svg.addEventListener('click', (e) => {
@@ -77,10 +86,12 @@ export class DagPanel extends Panel {
 
     if (this._renderer) {
       this._renderer.render(layout);
+      this._minimap?.setLayout(layout);
 
       // Fit after a tick to ensure SVG has dimensions
       requestAnimationFrame(() => {
         this._viewport?.fitToContent(layout.width, layout.height);
+        this._minimap?.setSvgRect(this._renderer!.svg.getBoundingClientRect());
       });
     }
   }
@@ -162,6 +173,7 @@ export class DagPanel extends Panel {
   }
 
   destroy(): void {
+    this._minimap?.destroy();
     this._viewport?.destroy();
     this._renderer?.destroy();
     this.events.dispose();

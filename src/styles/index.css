@@ -38,6 +38,18 @@
   box-sizing: border-box;
 }
 
+/* === Resize handle === */
+.rx-resize-handle {
+  position: absolute;
+  top: -3px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  cursor: ns-resize;
+  z-index: 1;
+}
+.rx-resize-handle:hover { background: var(--rx-accent); opacity: 0.3; }
+
 /* === Fixed overlay positioning === */
 [data-rx-devtools].rx-container-fixed {
   position: fixed;
@@ -367,3 +379,14 @@
   marker-end: url(#rx-arrow-active);
 }
 .rx-dag_edge-guarded { stroke-dasharray: 6 2 2 2; }
+
+/* Minimap */
+.rx-dag_minimap {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  border: 1px solid var(--rx-border);
+  border-radius: 3px;
+  cursor: crosshair;
+  z-index: 1;
+}

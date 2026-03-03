@@ -33,6 +33,7 @@ export class ReflexDevtools {
     this._engine = engine;
     this._options = options;
     this._mount();
+    this._wireCrossPanel();
     this._subscribe();
     this._hydrateFromSnapshot();
   }
@@ -64,6 +65,12 @@ export class ReflexDevtools {
 
     this._root = root;
 
+    // Resize handle
+    const resizeHandle = document.createElement('div');
+    resizeHandle.className = 'rx-resize-handle';
+    root.appendChild(resizeHandle);
+    this._initResize(resizeHandle, root);
+
     // Create panels in display order
     const enabled = this._options.panels ?? ['dag', 'stack', 'blackboard', 'events'];
     const collapsed = new Set(this._options.collapsed ?? []);
@@ -80,6 +87,52 @@ export class ReflexDevtools {
     if (enabled.includes('events')) {
       this._eventsPanel = new EventsPanel(root, { collapsed: collapsed.has('events') });
     }
+  }
+
+  private _initResize(handle: HTMLElement, root: HTMLElement): void {
+    let startY = 0;
+    let startH = 0;
+    const onMouseMove = (e: MouseEvent) => {
+      const dy = startY - e.clientY;
+      root.style.height = `${Math.max(100, startH + dy)}px`;
+    };
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+    handle.addEventListener('mousedown', (e) => {
+      startY = e.clientY;
+      startH = root.offsetHeight;
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+      e.preventDefault();
+    });
+  }
+
+  private _wireCrossPanel(): void {
+    // Events panel → DAG: click node event highlights node in DAG
+    this._eventsPanel?.events.on('event-click', (entry) => {
+      if (!this._dagPanel) return;
+      if (entry.category === 'node' && entry.type === 'node:enter') {
+        this._dagPanel.highlightNode(entry.summary);
+        this._dagPanel.expand();
+      }
+    });
+
+    // Stack panel → DAG: click frame switches workflow
+    this._stackPanel?.events.on('frame-click', ({ workflowId }) => {
+      // Could switch DAG to show that workflow — requires workflow object
+      // For now just expand DAG
+      this._dagPanel?.expand();
+    });
+
+    // Blackboard → DAG: click source highlights node
+    this._blackboardPanel?.events.on('source-click', ({ nodeId }) => {
+      if (this._dagPanel) {
+        this._dagPanel.highlightNode(nodeId);
+        this._dagPanel.expand();
+      }
+    });
   }
 
   private _subscribe(): void {
