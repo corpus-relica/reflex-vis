@@ -16,6 +16,8 @@
   --rx-event-bb: #81c784;
   --rx-event-workflow: #ce93d8;
   --rx-event-engine: #90a4ae;
+  --rx-edge-viable: #81c784;
+  --rx-edge-blocked: #ef5350;
   --rx-collapsed-width: 28px;
   --rx-inset: 8px;
   --rx-panel-width: calc((100vw - var(--rx-inset) * 2 - 2px) / 4);
@@ -410,6 +412,21 @@
   marker-end: url(#rx-arrow-active);
 }
 .rx-dag_edge-guarded { stroke-dasharray: 6 2 2 2; }
+
+/* Edge viability (guard evaluation at current node) */
+.rx-dag_edge-viable {
+  stroke: var(--rx-edge-viable);
+  stroke-dasharray: none;
+  opacity: 1;
+  stroke-width: 2;
+  marker-end: url(#rx-arrow-viable);
+}
+.rx-dag_edge-blocked {
+  stroke: var(--rx-edge-blocked);
+  stroke-dasharray: 4 3;
+  opacity: 0.35;
+  marker-end: url(#rx-arrow-blocked);
+}
 
 /* Cross-panel highlight */
 @keyframes rx-highlight {

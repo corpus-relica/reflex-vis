@@ -46,6 +46,26 @@ export class DagRenderer {
     activeMarker.appendChild(svgEl('path', { d: 'M 0 0 L 10 5 L 0 10 z', fill: 'var(--rx-accent)' }));
     defs.appendChild(activeMarker);
 
+    const viableMarker = svgEl('marker', {
+      id: 'rx-arrow-viable',
+      viewBox: '0 0 10 10',
+      refX: '10', refY: '5',
+      markerWidth: '6', markerHeight: '6',
+      orient: 'auto-start-reverse',
+    });
+    viableMarker.appendChild(svgEl('path', { d: 'M 0 0 L 10 5 L 0 10 z', fill: '#81c784' }));
+    defs.appendChild(viableMarker);
+
+    const blockedMarker = svgEl('marker', {
+      id: 'rx-arrow-blocked',
+      viewBox: '0 0 10 10',
+      refX: '10', refY: '5',
+      markerWidth: '6', markerHeight: '6',
+      orient: 'auto-start-reverse',
+    });
+    blockedMarker.appendChild(svgEl('path', { d: 'M 0 0 L 10 5 L 0 10 z', fill: '#ef5350' }));
+    defs.appendChild(blockedMarker);
+
     this._svg.appendChild(defs);
     this._svg.appendChild(this._content);
     container.appendChild(this._svg);
@@ -156,6 +176,26 @@ export class DagRenderer {
       'data-to': edge.target,
     });
     return path;
+  }
+
+  setEdgeViable(edgeId: string): void {
+    const el = this._edgeEls.get(edgeId);
+    if (!el) return;
+    el.classList.remove(className('dag', 'edge', 'blocked'));
+    el.classList.add(className('dag', 'edge', 'viable'));
+  }
+
+  setEdgeBlocked(edgeId: string): void {
+    const el = this._edgeEls.get(edgeId);
+    if (!el) return;
+    el.classList.remove(className('dag', 'edge', 'viable'));
+    el.classList.add(className('dag', 'edge', 'blocked'));
+  }
+
+  clearViability(): void {
+    for (const el of this._edgeEls.values()) {
+      el.classList.remove(className('dag', 'edge', 'viable'), className('dag', 'edge', 'blocked'));
+    }
   }
 
   destroy(): void {

@@ -163,6 +163,25 @@ export class DagPanel extends Panel {
     }
   }
 
+  showEdgeViability(currentNodeId: string, validEdgeIds: Set<string>): void {
+    if (!this._renderer || !this._currentLayout) return;
+
+    // Clear previous viability markings
+    this._renderer.clearViability();
+
+    // Mark outgoing guarded edges from current node as viable or blocked
+    for (const edge of this._currentLayout.edges) {
+      if (edge.source !== currentNodeId) continue;
+      if (!edge.guarded) continue;
+
+      if (validEdgeIds.has(edge.id)) {
+        this._renderer.setEdgeViable(edge.id);
+      } else {
+        this._renderer.setEdgeBlocked(edge.id);
+      }
+    }
+  }
+
   highlightNode(nodeId: string): void {
     if (!this._renderer) return;
     this._renderer.setNodeState(nodeId, 'active');

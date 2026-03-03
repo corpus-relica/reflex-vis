@@ -147,6 +147,7 @@ export class ReflexDevtools {
       this._dagPanel?.onNodeEnter(node, workflow);
       this._stackPanel?.onNodeEnter(node, workflow);
       this._eventsPanel?.onNodeEnter(node, workflow);
+      this._updateEdgeViability(node.id);
     });
 
     on('node:exit', (payload) => {
@@ -165,6 +166,8 @@ export class ReflexDevtools {
       const { entries, workflow } = payload as { entries: BlackboardEntry[]; workflow: Workflow };
       this._blackboardPanel?.onBlackboardWrite(entries, workflow);
       this._eventsPanel?.onBlackboardWrite(entries, workflow);
+      // Re-evaluate edge viability — blackboard change may affect guard results
+      this._updateEdgeViability();
     });
 
     on('workflow:push', (payload) => {
@@ -192,6 +195,19 @@ export class ReflexDevtools {
       const { reason } = payload as { reason: string };
       this._eventsPanel?.onEngineSuspend(reason);
     });
+  }
+
+  private _updateEdgeViability(nodeId?: string): void {
+    if (!this._dagPanel) return;
+    const engine = this._engine as any;
+    const validEdges: Edge[] | undefined = engine.validEdges?.();
+    if (!validEdges) return;
+    const validIds = new Set(validEdges.map((e: Edge) => e.id));
+    // Use provided nodeId or fall back to engine's current node
+    const currentNode = nodeId ?? engine.snapshot?.()?.currentNodeId;
+    if (currentNode) {
+      this._dagPanel.showEdgeViability(currentNode, validIds);
+    }
   }
 
   private _hydrateFromSnapshot(): void {
