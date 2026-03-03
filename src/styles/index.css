@@ -122,3 +122,155 @@
   background: var(--rx-border);
   border-radius: 2px;
 }
+
+/* === Stack Panel === */
+.rx-stack_list { padding: 2px 0; }
+.rx-stack_frame {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-family: var(--rx-font-mono);
+  font-size: var(--rx-font-size);
+}
+.rx-stack_frame:hover { background: rgba(255, 255, 255, 0.05); }
+.rx-stack_frame-current {
+  background: var(--rx-accent-dim);
+  color: var(--rx-accent);
+}
+.rx-stack_indicator { width: 10px; flex-shrink: 0; }
+.rx-stack_workflow { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rx-stack_node { color: var(--rx-text-muted); flex-shrink: 0; }
+.rx-stack_depth { color: var(--rx-text-muted); flex-shrink: 0; font-size: 9px; }
+
+/* === Blackboard Panel === */
+.rx-bb_toolbar {
+  display: flex;
+  gap: 6px;
+  padding: 2px 4px;
+  border-bottom: 1px solid var(--rx-border);
+  align-items: center;
+}
+.rx-bb_filter {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--rx-border);
+  border-radius: 3px;
+  color: var(--rx-text);
+  padding: 2px 6px;
+  font-size: var(--rx-font-size);
+  font-family: var(--rx-font-ui);
+  outline: none;
+}
+.rx-bb_filter:focus { border-color: var(--rx-accent); }
+.rx-bb_toggle {
+  font-size: 9px;
+  color: var(--rx-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+.rx-bb_table { font-family: var(--rx-font-mono); font-size: var(--rx-font-size); }
+.rx-bb_header {
+  display: flex;
+  gap: 4px;
+  padding: 2px 6px;
+  color: var(--rx-text-muted);
+  font-size: 9px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--rx-border);
+}
+.rx-bb_header span { flex: 1; }
+.rx-bb_row {
+  display: flex;
+  gap: 4px;
+  padding: 2px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+.rx-bb_row:hover { background: rgba(255, 255, 255, 0.03); }
+.rx-bb_row-inherited { opacity: 0.6; font-style: italic; }
+.rx-bb_key { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rx-bb_value {
+  flex: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--rx-text-muted);
+}
+.rx-bb_source {
+  flex: 1;
+  color: var(--rx-accent);
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rx-bb_source:hover { text-decoration: underline; }
+
+@keyframes rx-flash {
+  0% { background: var(--rx-accent-dim); }
+  100% { background: transparent; }
+}
+.rx-bb_row-flash { animation: rx-flash 0.6s ease-out; }
+
+/* === Events Panel === */
+.rx-events_toolbar {
+  display: flex;
+  gap: 6px;
+  padding: 2px 4px;
+  border-bottom: 1px solid var(--rx-border);
+  align-items: center;
+}
+.rx-events_filter {
+  background: transparent;
+  border: 1px solid var(--rx-border);
+  border-radius: 3px;
+  color: var(--rx-text);
+  padding: 1px 4px;
+  font-size: 10px;
+  outline: none;
+}
+.rx-events_clear {
+  background: transparent;
+  border: 1px solid var(--rx-border);
+  border-radius: 3px;
+  color: var(--rx-text-muted);
+  padding: 1px 6px;
+  font-size: 9px;
+  cursor: pointer;
+}
+.rx-events_clear:hover { color: var(--rx-text); border-color: var(--rx-text-muted); }
+.rx-events_log {
+  overflow-y: auto;
+  font-family: var(--rx-font-mono);
+  font-size: var(--rx-font-size);
+  flex: 1;
+}
+.rx-events_row {
+  display: flex;
+  gap: 6px;
+  padding: 1px 6px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+.rx-events_row:hover { background: rgba(255, 255, 255, 0.03); }
+.rx-events_time { color: var(--rx-text-muted); flex-shrink: 0; width: 60px; }
+.rx-events_type {
+  flex-shrink: 0;
+  width: 90px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rx-events_type-node { color: var(--rx-event-node); }
+.rx-events_type-bb { color: var(--rx-event-bb); }
+.rx-events_type-workflow { color: var(--rx-event-workflow); }
+.rx-events_type-engine { color: var(--rx-event-engine); }
+.rx-events_summary {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
