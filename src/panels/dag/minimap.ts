@@ -104,7 +104,7 @@ export class Minimap {
       const vw = this._svgRect.width / ts;
       const vh = this._svgRect.height / ts;
 
-      ctx.strokeStyle = 'var(--rx-accent, #4fc3f7)';
+      ctx.strokeStyle = '#4fc3f7';
       ctx.lineWidth = 1;
       ctx.strokeRect(
         ox + vx * scale,

@@ -61,8 +61,7 @@ export class DagRenderer {
     this._nodeStates.clear();
     this._edgeStates.clear();
 
-    this._svg.setAttribute('viewBox', `0 0 ${layout.width} ${layout.height}`);
-
+    // No viewBox — viewport transform handles all pan/zoom
     // Edges first (behind nodes)
     for (const edge of layout.edges) {
       const path = this._renderEdge(edge);

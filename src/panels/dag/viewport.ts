@@ -89,13 +89,13 @@ export class Viewport {
     if (rect.width === 0 || rect.height === 0 || graphWidth === 0 || graphHeight === 0) return;
 
     const pad = 16;
+    // Fit width, but don't shrink below 1.0 — prefer pannable over tiny
     const scaleX = (rect.width - pad * 2) / graphWidth;
-    const scaleY = (rect.height - pad * 2) / graphHeight;
-    const scale = Math.min(scaleX, scaleY, 2); // don't over-zoom small graphs
+    const scale = Math.min(Math.max(scaleX, 1), 2);
 
     this._transform.scale = scale;
     this._transform.x = (rect.width - graphWidth * scale) / 2;
-    this._transform.y = (rect.height - graphHeight * scale) / 2;
+    this._transform.y = pad;
     this._apply();
   }
 

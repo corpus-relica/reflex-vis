@@ -18,7 +18,7 @@
   --rx-event-engine: #90a4ae;
   --rx-collapsed-width: 28px;
   --rx-inset: 8px;
-  --rx-panel-width: calc(25vw - var(--rx-inset) / 2);
+  --rx-panel-width: calc((100vw - var(--rx-inset) * 2 - 2px) / 4);
 
   box-sizing: border-box;
   font-family: var(--rx-font-ui);
@@ -311,6 +311,12 @@
 }
 
 /* === DAG Panel === */
+[data-panel="dag"] .rx-panel_body {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 .rx-dag_breadcrumb {
   padding: 2px 6px;
   font-size: 9px;
@@ -340,7 +346,7 @@
 .rx-dag_svg:active { cursor: grabbing; }
 
 /* Nodes */
-.rx-dag_node { cursor: pointer; }
+.rx-dag_node { pointer-events: none; }
 .rx-dag_node-bg {
   fill: var(--rx-bg-panel);
   stroke: var(--rx-border);
@@ -354,7 +360,7 @@
   pointer-events: none;
   transition: fill 0.3s ease;
 }
-.rx-dag_node:hover .rx-dag_node-bg { stroke: var(--rx-text-muted); }
+
 
 /* Node types */
 .rx-dag_node-terminal .rx-dag_node-bg { stroke-dasharray: 4 2; }
@@ -372,12 +378,6 @@
   stroke: rgba(79, 195, 247, 0.3);
 }
 
-/* Active node pulse */
-@keyframes rx-pulse {
-  0%, 100% { filter: drop-shadow(0 0 2px var(--rx-accent)); }
-  50% { filter: drop-shadow(0 0 6px var(--rx-accent)); }
-}
-.rx-dag_node-active { animation: rx-pulse 1.5s ease-in-out infinite; }
 
 /* Edges */
 .rx-dag_edge {
