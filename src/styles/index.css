@@ -17,6 +17,8 @@
   --rx-event-workflow: #ce93d8;
   --rx-event-engine: #90a4ae;
   --rx-collapsed-width: 28px;
+  --rx-inset: 8px;
+  --rx-panel-width: calc(25vw - var(--rx-inset) / 2);
 
   box-sizing: border-box;
   font-family: var(--rx-font-ui);
@@ -28,7 +30,8 @@
   overflow: hidden;
   display: flex;
   flex-direction: row;
-  width: 900px;
+  width: fit-content;
+  max-width: 100vw;
   height: 250px;
 }
 
@@ -55,14 +58,15 @@
   position: fixed;
   z-index: 99999;
 }
-[data-rx-devtools].rx-container-fixed.rx-pos-top-right    { top: 8px; right: 8px; }
-[data-rx-devtools].rx-container-fixed.rx-pos-top-left     { top: 8px; left: 8px; }
-[data-rx-devtools].rx-container-fixed.rx-pos-bottom-right { bottom: 8px; right: 8px; }
-[data-rx-devtools].rx-container-fixed.rx-pos-bottom-left  { bottom: 8px; left: 8px; }
+[data-rx-devtools].rx-container-fixed.rx-pos-top-right    { top: var(--rx-inset); right: var(--rx-inset); }
+[data-rx-devtools].rx-container-fixed.rx-pos-top-left     { top: var(--rx-inset); left: var(--rx-inset); }
+[data-rx-devtools].rx-container-fixed.rx-pos-bottom-right { bottom: var(--rx-inset); right: var(--rx-inset); }
+[data-rx-devtools].rx-container-fixed.rx-pos-bottom-left  { bottom: var(--rx-inset); left: var(--rx-inset); }
 
 /* === Panel === */
 .rx-panel {
-  flex: 1;
+  flex: 0 0 var(--rx-panel-width);
+  width: var(--rx-panel-width);
   display: flex;
   flex-direction: column;
   min-width: 0;

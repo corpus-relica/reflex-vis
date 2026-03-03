@@ -35,7 +35,8 @@ export class ReflexDevtools {
     this._mount();
     this._wireCrossPanel();
     this._subscribe();
-    this._hydrateFromSnapshot();
+    // Panels defer mount() via queueMicrotask, so hydration must wait
+    queueMicrotask(() => this._hydrateFromSnapshot());
   }
 
   get engine(): ReflexEngine { return this._engine; }
@@ -200,12 +201,11 @@ export class ReflexDevtools {
       this._blackboardPanel?.update(snap);
       this._eventsPanel?.update(snap);
 
-      // Show current workflow graph
-      if (snap.currentWorkflowId) {
-        const registry = this._engine as any;
-        // Try to get the workflow for initial DAG rendering
-        const workflow = registry._registry?.get?.(snap.currentWorkflowId);
-        if (workflow && this._dagPanel) {
+      // Show current workflow graph via public API
+      if (snap.currentWorkflowId && this._dagPanel) {
+        const engine = this._engine as any;
+        const workflow = engine.currentWorkflow?.() ?? engine._registry?.get?.(snap.currentWorkflowId);
+        if (workflow) {
           this._dagPanel.showWorkflow(workflow);
         }
       }
