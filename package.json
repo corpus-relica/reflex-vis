@@ -8,17 +8,17 @@
     ".": {
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
+      "require": "./dist/cjs/index.cjs"
     },
     "./tap": {
       "types": "./dist/types/tap.d.ts",
       "import": "./dist/esm/tap.js",
-      "require": "./dist/cjs/tap.js"
+      "require": "./dist/cjs/tap.cjs"
     },
     "./remote": {
       "types": "./dist/types/remote.d.ts",
       "import": "./dist/esm/remote.js",
-      "require": "./dist/cjs/remote.js"
+      "require": "./dist/cjs/remote.cjs"
     }
   },
   "typesVersions": {
@@ -27,7 +27,7 @@
       "remote": ["dist/types/remote.d.ts"]
     }
   },
-  "main": "./dist/cjs/index.js",
+  "main": "./dist/cjs/index.cjs",
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
   "files": [
