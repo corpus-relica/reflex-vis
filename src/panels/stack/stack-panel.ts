@@ -8,6 +8,7 @@ export interface StackEntry {
   workflowId: string;
   currentNodeId: string;
   depth: number;
+  status?: 'completed';
 }
 
 export interface StackPanelEvents {
@@ -21,6 +22,7 @@ export class StackPanel extends Panel {
 
   private _list: HTMLElement | null = null;
   private _entries: StackEntry[] = [];
+  private _completedEntries: StackEntry[] = [];
   private _focusedWorkflowId: string | null = null;
 
   constructor(container: HTMLElement, options?: PanelOptions) {
@@ -37,6 +39,7 @@ export class StackPanel extends Panel {
     const snap = snapshot as { stack?: StackFrame[]; currentWorkflowId?: string; currentNodeId?: string } | null;
     if (!snap) return;
     this._entries = [];
+    this._completedEntries = [];
     // Build stack from snapshot — current frame is not on the stack array
     if (snap.stack) {
       for (let i = snap.stack.length - 1; i >= 0; i--) {
@@ -80,14 +83,62 @@ export class StackPanel extends Panel {
     if (this._focusedWorkflowId === frame.workflowId) {
       this._focusedWorkflowId = null;
     }
-    // Pop the current, parent becomes active again
+    // Pop the current, move to completed
     if (this._entries.length > 0) {
-      this._entries.shift();
+      const popped = this._entries.shift()!;
+      popped.status = 'completed';
+      this._completedEntries.unshift(popped);
     }
     if (this._entries.length > 0) {
       this._entries[0].workflowId = parentWorkflow.id;
     }
     this._render();
+  }
+
+  onEngineComplete(_workflow: Workflow): void {
+    for (const entry of this._entries) entry.status = 'completed';
+    this._completedEntries.unshift(...this._entries);
+    this._entries = [];
+    this._render();
+  }
+
+  onEngineSuspend(_reason: string): void {
+    // No-op — engine may resume, keep entries live
+  }
+
+  resetSession(): void {
+    this._entries = [];
+    this._completedEntries = [];
+    this._focusedWorkflowId = null;
+    this._render();
+  }
+
+  private _renderEntry(entry: StackEntry, focusedId: string | undefined, completed: boolean): HTMLElement {
+    const isFocused = !completed && entry.workflowId === focusedId;
+    let cls = className('stack', 'frame');
+    if (isFocused) cls += ` ${className('stack', 'frame', 'current')}`;
+    if (completed) cls += ` ${className('stack', 'frame', 'completed')}`;
+    const row = el('div', { class: cls });
+
+    const indicator = el('span', { class: className('stack', 'indicator') });
+    indicator.textContent = isFocused ? '\u25B6' : ' ';
+
+    const wfLabel = el('span', { class: className('stack', 'workflow') });
+    wfLabel.textContent = entry.workflowId;
+
+    const nodeLabel = el('span', { class: className('stack', 'node') });
+    nodeLabel.textContent = entry.currentNodeId || '\u2014';
+
+    const depthLabel = el('span', { class: className('stack', 'depth') });
+    depthLabel.textContent = `[${entry.depth}]`;
+
+    row.append(indicator, wfLabel, nodeLabel, depthLabel);
+    row.addEventListener('click', () => {
+      this._focusedWorkflowId = entry.workflowId;
+      this._render();
+      this.events.emit('frame-click', { workflowId: entry.workflowId, depth: entry.depth });
+    });
+    return row;
   }
 
   private _render(): void {
@@ -97,32 +148,19 @@ export class StackPanel extends Panel {
     // Focused workflow defaults to the engine's active (top of stack)
     const focusedId = this._focusedWorkflowId ?? this._entries[0]?.workflowId;
 
-    for (let i = 0; i < this._entries.length; i++) {
-      const entry = this._entries[i];
-      const isFocused = entry.workflowId === focusedId;
-      const row = el('div', {
-        class: className('stack', 'frame') + (isFocused ? ` ${className('stack', 'frame', 'current')}` : ''),
-      });
+    for (const entry of this._entries) {
+      this._list.appendChild(this._renderEntry(entry, focusedId, false));
+    }
 
-      const indicator = el('span', { class: className('stack', 'indicator') });
-      indicator.textContent = isFocused ? '\u25B6' : ' ';
+    // Completed entries separator + rows
+    if (this._completedEntries.length > 0) {
+      const sep = el('div', { class: className('stack', 'separator') });
+      sep.textContent = 'Last Run';
+      this._list.appendChild(sep);
 
-      const wfLabel = el('span', { class: className('stack', 'workflow') });
-      wfLabel.textContent = entry.workflowId;
-
-      const nodeLabel = el('span', { class: className('stack', 'node') });
-      nodeLabel.textContent = entry.currentNodeId || '\u2014';
-
-      const depthLabel = el('span', { class: className('stack', 'depth') });
-      depthLabel.textContent = `[${entry.depth}]`;
-
-      row.append(indicator, wfLabel, nodeLabel, depthLabel);
-      row.addEventListener('click', () => {
-        this._focusedWorkflowId = entry.workflowId;
-        this._render();
-        this.events.emit('frame-click', { workflowId: entry.workflowId, depth: entry.depth });
-      });
-      this._list.appendChild(row);
+      for (const entry of this._completedEntries) {
+        this._list.appendChild(this._renderEntry(entry, focusedId, true));
+      }
     }
   }
 

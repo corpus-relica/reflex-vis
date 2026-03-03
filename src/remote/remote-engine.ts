@@ -91,7 +91,19 @@ export class RemoteReflexEngine {
     }
   }
 
+  private _dispatch(event: string, payload: unknown): void {
+    const handlers = this._handlers.get(event);
+    if (handlers) {
+      for (const handler of handlers) {
+        try { handler(payload); } catch { /* ignore */ }
+      }
+    }
+  }
+
   private _handleInit(event: DevtoolsInitEvent): void {
+    // Signal new session — panels should clear stale state
+    this._dispatch('session:reset', undefined);
+
     this._snapshot = event.snapshot;
 
     if (event.workflow) {

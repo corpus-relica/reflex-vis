@@ -162,6 +162,14 @@
 .rx-stack_workflow { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rx-stack_node { color: var(--rx-text-muted); flex-shrink: 0; }
 .rx-stack_depth { color: var(--rx-text-muted); flex-shrink: 0; font-size: 9px; }
+.rx-stack_separator {
+  padding: 1px 6px;
+  font-size: 9px;
+  color: var(--rx-text-muted);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 2px;
+}
+.rx-stack_frame-completed { opacity: 0.5; }
 
 /* === Blackboard Panel === */
 .rx-bb_toolbar {

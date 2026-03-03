@@ -200,12 +200,19 @@ export class ReflexDevtools {
 
     on('engine:complete', (payload) => {
       const { workflow } = payload as { workflow: Workflow };
+      this._stackPanel?.onEngineComplete(workflow);
       this._eventsPanel?.onEngineComplete(workflow);
     });
 
     on('engine:suspend', (payload) => {
       const { reason } = payload as { reason: string };
+      this._stackPanel?.onEngineSuspend(reason);
       this._eventsPanel?.onEngineSuspend(reason);
+    });
+
+    on('session:reset' as EngineEvent, () => {
+      this._stackPanel?.resetSession();
+      this._userFocusedWorkflowId = null;
     });
   }
 
