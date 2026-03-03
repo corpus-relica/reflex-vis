@@ -40,6 +40,7 @@ export class ReflexDevtoolsTap {
   private readonly _engine: ReflexEngine;
   private _handler: TapEventHandler | null = null;
   private _detached = false;
+  private _initSent = false;
 
   constructor(engine: ReflexEngine, handler?: TapEventHandler) {
     this._engine = engine;
@@ -68,6 +69,11 @@ export class ReflexDevtoolsTap {
 
   private _emit(event: DevtoolsWireEvent): void {
     if (this._detached || !this._handler) return;
+    // If init wasn't sent yet (engine wasn't ready at tap creation),
+    // send it now before the first engine event reaches the frontend.
+    if (!this._initSent && event.type !== 'devtools:init') {
+      this._sendInit();
+    }
     try {
       this._handler(event);
     } catch {
@@ -88,9 +94,9 @@ export class ReflexDevtoolsTap {
         validEdges: this._safeValidEdges(),
       };
       this._emit(init);
+      this._initSent = true;
     } catch {
-      // Engine not initialized yet — skip init event.
-      // State will arrive via node:enter once the engine starts.
+      // Engine not initialized yet — will retry before the first engine event.
     }
   }
 

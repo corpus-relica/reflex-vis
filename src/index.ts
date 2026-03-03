@@ -211,8 +211,9 @@ export class ReflexDevtools {
     });
 
     on('session:reset' as EngineEvent, () => {
-      this._stackPanel?.resetSession();
       this._userFocusedWorkflowId = null;
+      this._stackPanel?.resetSession();
+      this._hydrateFromSnapshot();
     });
   }
 

@@ -101,9 +101,7 @@ export class RemoteReflexEngine {
   }
 
   private _handleInit(event: DevtoolsInitEvent): void {
-    // Signal new session — panels should clear stale state
-    this._dispatch('session:reset', undefined);
-
+    // Update internal state first so panels see the fresh snapshot
     this._snapshot = event.snapshot;
 
     if (event.workflow) {
@@ -117,6 +115,9 @@ export class RemoteReflexEngine {
     } else {
       this._validEdges = [];
     }
+
+    // Signal new session — panels clear stale state and re-hydrate from the now-updated snapshot
+    this._dispatch('session:reset', undefined);
   }
 
   private _handleEvent(event: DevtoolsEngineEvent): void {
