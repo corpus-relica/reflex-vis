@@ -1,9 +1,13 @@
-export function embedStyle(doc: Document, id: string, css: string): void {
-  if (doc.querySelector(`style[data-rx-devtools="${id}"]`)) {
-    return;
+const TAG = 'data-rx-devtools';
+
+export function embedStyle(css: string, id = 'default'): () => void {
+  const selector = `style[${TAG}="${id}"]`;
+  if (document.querySelector(selector)) {
+    return () => document.querySelector(selector)?.remove();
   }
-  const el = doc.createElement('style');
-  el.setAttribute('data-rx-devtools', id);
+  const el = document.createElement('style');
+  el.setAttribute(TAG, id);
   el.textContent = css;
-  doc.head.appendChild(el);
+  document.head.appendChild(el);
+  return () => el.remove();
 }

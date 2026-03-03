@@ -1,4 +1,6 @@
 /* @corpus-relica/reflex-devtools styles */
+
+/* === Container === */
 [data-rx-devtools] {
   --rx-bg: rgba(0, 0, 0, 0.85);
   --rx-bg-panel: rgba(30, 30, 30, 0.95);
@@ -14,9 +16,109 @@
   --rx-event-bb: #81c784;
   --rx-event-workflow: #ce93d8;
   --rx-event-engine: #90a4ae;
+  --rx-collapsed-width: 28px;
 
   box-sizing: border-box;
   font-family: var(--rx-font-ui);
   font-size: var(--rx-font-size);
   color: var(--rx-text);
+  background: var(--rx-bg);
+  border: 1px solid var(--rx-border);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  width: 900px;
+  height: 250px;
+}
+
+[data-rx-devtools] *,
+[data-rx-devtools] *::before,
+[data-rx-devtools] *::after {
+  box-sizing: border-box;
+}
+
+/* === Fixed overlay positioning === */
+[data-rx-devtools].rx-container-fixed {
+  position: fixed;
+  z-index: 99999;
+}
+[data-rx-devtools].rx-container-fixed.rx-pos-top-right    { top: 8px; right: 8px; }
+[data-rx-devtools].rx-container-fixed.rx-pos-top-left     { top: 8px; left: 8px; }
+[data-rx-devtools].rx-container-fixed.rx-pos-bottom-right { bottom: 8px; right: 8px; }
+[data-rx-devtools].rx-container-fixed.rx-pos-bottom-left  { bottom: 8px; left: 8px; }
+
+/* === Panel === */
+.rx-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-right: 1px solid var(--rx-border);
+  overflow: hidden;
+}
+.rx-panel:last-child { border-right: none; }
+
+/* Panel header */
+.rx-panel_header {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: var(--rx-bg-panel);
+  border-bottom: 1px solid var(--rx-border);
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+  min-height: 24px;
+}
+.rx-panel_header:hover { background: rgba(255, 255, 255, 0.05); }
+
+.rx-panel_title {
+  font-weight: 600;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Panel body */
+.rx-panel_body {
+  flex: 1;
+  overflow: auto;
+  padding: 4px;
+  min-height: 0;
+}
+
+/* === Collapsed panel === */
+.rx-panel-collapsed {
+  flex: 0 0 var(--rx-collapsed-width);
+  min-width: var(--rx-collapsed-width);
+  max-width: var(--rx-collapsed-width);
+}
+.rx-panel-collapsed .rx-panel_header {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 8px 4px;
+  height: 100%;
+  border-bottom: none;
+  border-right: none;
+  justify-content: flex-start;
+}
+.rx-panel-collapsed .rx-panel_body {
+  display: none;
+}
+
+/* === Scrollbar styling === */
+[data-rx-devtools] ::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+[data-rx-devtools] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+[data-rx-devtools] ::-webkit-scrollbar-thumb {
+  background: var(--rx-border);
+  border-radius: 2px;
 }
