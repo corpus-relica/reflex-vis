@@ -97,8 +97,8 @@ export class DagPanel extends Panel {
   }
 
   onNodeEnter(node: Node, workflow: Workflow): void {
-    // If viewing a different workflow, switch to this one
-    if (this._currentWorkflowId !== workflow.id) {
+    // Show workflow if switching to a different one, or if no graph rendered yet
+    if (this._currentWorkflowId !== workflow.id || !this._currentLayout) {
       this.showWorkflow(workflow);
     }
 
