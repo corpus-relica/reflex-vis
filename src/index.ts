@@ -28,6 +28,7 @@ export class ReflexDevtools {
   private _stackPanel: StackPanel | null = null;
   private _blackboardPanel: BlackboardPanel | null = null;
   private _eventsPanel: EventsPanel | null = null;
+  private _userFocusedWorkflowId: string | null = null;
 
   constructor(engine: ReflexEngine, options: DevtoolsOptions = {}) {
     this._engine = engine;
@@ -124,6 +125,9 @@ export class ReflexDevtools {
     // Stack panel → DAG: click frame switches workflow view
     this._stackPanel?.events.on('frame-click', ({ workflowId }) => {
       if (!this._dagPanel) return;
+      // If clicking the engine's active workflow, clear user focus (resume auto-follow)
+      const snap = this._engine.snapshot();
+      this._userFocusedWorkflowId = workflowId === snap.currentWorkflowId ? null : workflowId;
       this._dagPanel.switchToWorkflow(workflowId);
       this._dagPanel.expand();
     });
@@ -144,10 +148,13 @@ export class ReflexDevtools {
 
     on('node:enter', (payload) => {
       const { node, workflow } = payload as { node: Node; workflow: Workflow };
-      this._dagPanel?.onNodeEnter(node, workflow);
+      const preserveView = this._userFocusedWorkflowId != null;
+      this._dagPanel?.onNodeEnter(node, workflow, { preserveView });
       this._stackPanel?.onNodeEnter(node, workflow);
       this._eventsPanel?.onNodeEnter(node, workflow);
-      this._updateEdgeViability(node.id);
+      if (!preserveView) {
+        this._updateEdgeViability(node.id);
+      }
     });
 
     on('node:exit', (payload) => {
@@ -180,6 +187,10 @@ export class ReflexDevtools {
 
     on('workflow:pop', (payload) => {
       const { frame, workflow } = payload as { frame: StackFrame; workflow: Workflow };
+      // If the focused workflow was popped, clear user focus
+      if (this._userFocusedWorkflowId === frame.workflowId) {
+        this._userFocusedWorkflowId = null;
+      }
       this._dagPanel?.onWorkflowPop(frame, workflow);
       this._stackPanel?.onWorkflowPop(frame, workflow);
       this._blackboardPanel?.onWorkflowPop();

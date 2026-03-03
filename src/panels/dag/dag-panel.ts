@@ -103,7 +103,15 @@ export class DagPanel extends Panel {
     }
   }
 
-  onNodeEnter(node: Node, workflow: Workflow): void {
+  onNodeEnter(node: Node, workflow: Workflow, options?: { preserveView?: boolean }): void {
+    // Always record traversal history regardless of what's displayed
+    this._recordNodeVisit(workflow.id, node.id);
+
+    if (options?.preserveView && this._currentWorkflowId !== workflow.id) {
+      // User is viewing a different workflow — don't switch the display
+      return;
+    }
+
     // Show workflow if switching to a different one, or if no graph rendered yet
     if (this._currentWorkflowId !== workflow.id || !this._currentLayout) {
       this.showWorkflow(workflow);
@@ -114,8 +122,7 @@ export class DagPanel extends Panel {
       this._renderer.setNodeState(this._activeNodeId, 'visited');
     }
 
-    // Record visit and activate
-    this._recordNodeVisit(workflow.id, node.id);
+    // Activate new node
     this._activeNodeId = node.id;
     this._renderer?.setNodeState(node.id, 'active');
   }

@@ -61,7 +61,6 @@ export class StackPanel extends Panel {
   onNodeEnter(node: Node, _workflow: Workflow): void {
     if (this._entries.length > 0) {
       this._entries[0].currentNodeId = node.id;
-      this._focusedWorkflowId = null; // reset to engine's active
       this._render();
     }
   }
@@ -76,7 +75,11 @@ export class StackPanel extends Panel {
     this._render();
   }
 
-  onWorkflowPop(_frame: StackFrame, parentWorkflow: Workflow): void {
+  onWorkflowPop(frame: StackFrame, parentWorkflow: Workflow): void {
+    // If the focused workflow was popped, clear user focus
+    if (this._focusedWorkflowId === frame.workflowId) {
+      this._focusedWorkflowId = null;
+    }
     // Pop the current, parent becomes active again
     if (this._entries.length > 0) {
       this._entries.shift();
