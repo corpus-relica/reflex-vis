@@ -21,6 +21,7 @@ export class StackPanel extends Panel {
 
   private _list: HTMLElement | null = null;
   private _entries: StackEntry[] = [];
+  private _focusedWorkflowId: string | null = null;
 
   constructor(container: HTMLElement, options?: PanelOptions) {
     super(container, options);
@@ -60,6 +61,7 @@ export class StackPanel extends Panel {
   onNodeEnter(node: Node, _workflow: Workflow): void {
     if (this._entries.length > 0) {
       this._entries[0].currentNodeId = node.id;
+      this._focusedWorkflowId = null; // reset to engine's active
       this._render();
     }
   }
@@ -89,15 +91,18 @@ export class StackPanel extends Panel {
     if (!this._list) return;
     this._list.innerHTML = '';
 
+    // Focused workflow defaults to the engine's active (top of stack)
+    const focusedId = this._focusedWorkflowId ?? this._entries[0]?.workflowId;
+
     for (let i = 0; i < this._entries.length; i++) {
       const entry = this._entries[i];
-      const isCurrent = i === 0;
+      const isFocused = entry.workflowId === focusedId;
       const row = el('div', {
-        class: className('stack', 'frame') + (isCurrent ? ` ${className('stack', 'frame', 'current')}` : ''),
+        class: className('stack', 'frame') + (isFocused ? ` ${className('stack', 'frame', 'current')}` : ''),
       });
 
       const indicator = el('span', { class: className('stack', 'indicator') });
-      indicator.textContent = isCurrent ? '\u25B6' : ' ';
+      indicator.textContent = isFocused ? '\u25B6' : ' ';
 
       const wfLabel = el('span', { class: className('stack', 'workflow') });
       wfLabel.textContent = entry.workflowId;
@@ -110,6 +115,8 @@ export class StackPanel extends Panel {
 
       row.append(indicator, wfLabel, nodeLabel, depthLabel);
       row.addEventListener('click', () => {
+        this._focusedWorkflowId = entry.workflowId;
+        this._render();
         this.events.emit('frame-click', { workflowId: entry.workflowId, depth: entry.depth });
       });
       this._list.appendChild(row);
