@@ -274,12 +274,17 @@
   font-size: var(--rx-font-size);
   flex: 1;
 }
+@keyframes rx-slide-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 .rx-events_row {
   display: flex;
   gap: 6px;
   padding: 1px 6px;
   cursor: pointer;
   border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  animation: rx-slide-in 0.15s ease-out;
 }
 .rx-events_row:hover { background: rgba(255, 255, 255, 0.03); }
 .rx-events_time { color: var(--rx-text-muted); flex-shrink: 0; width: 60px; }
@@ -336,12 +341,14 @@
   fill: var(--rx-bg-panel);
   stroke: var(--rx-border);
   stroke-width: 1;
+  transition: fill 0.3s ease, stroke 0.3s ease, stroke-width 0.15s ease;
 }
 .rx-dag_node-label {
   fill: var(--rx-text);
   font-family: var(--rx-font-mono);
   font-size: 10px;
   pointer-events: none;
+  transition: fill 0.3s ease;
 }
 .rx-dag_node:hover .rx-dag_node-bg { stroke: var(--rx-text-muted); }
 
@@ -373,6 +380,7 @@
   fill: none;
   stroke: var(--rx-text-muted);
   stroke-width: 1.5;
+  transition: stroke 0.3s ease, stroke-width 0.15s ease, opacity 0.3s ease;
 }
 .rx-dag_edge-untraveled {
   stroke-dasharray: 4 3;
@@ -385,6 +393,11 @@
   opacity: 1;
   marker-end: url(#rx-arrow-active);
 }
+@keyframes rx-edge-flash {
+  0% { filter: drop-shadow(0 0 4px var(--rx-accent)); }
+  100% { filter: none; }
+}
+.rx-dag_edge-active { animation: rx-edge-flash 0.4s ease-out; }
 .rx-dag_edge-traveled {
   stroke: var(--rx-accent);
   stroke-width: 1.5;
@@ -393,6 +406,13 @@
   marker-end: url(#rx-arrow-active);
 }
 .rx-dag_edge-guarded { stroke-dasharray: 6 2 2 2; }
+
+/* Cross-panel highlight */
+@keyframes rx-highlight {
+  0% { outline: 2px solid var(--rx-accent); outline-offset: -2px; }
+  100% { outline: 2px solid transparent; outline-offset: -2px; }
+}
+.rx-highlight-flash { animation: rx-highlight 1.5s ease-out; }
 
 /* Minimap */
 .rx-dag_minimap {
@@ -403,4 +423,15 @@
   border-radius: 3px;
   cursor: crosshair;
   z-index: 1;
+}
+
+/* === Reduced motion === */
+@media (prefers-reduced-motion: reduce) {
+  [data-rx-devtools] *,
+  [data-rx-devtools] *::before,
+  [data-rx-devtools] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
