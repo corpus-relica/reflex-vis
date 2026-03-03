@@ -187,11 +187,12 @@ export class ReflexDevtools {
 
     on('workflow:pop', (payload) => {
       const { frame, workflow } = payload as { frame: StackFrame; workflow: Workflow };
-      // If the focused workflow was popped, clear user focus
+      const preserveView = this._userFocusedWorkflowId === workflow.id;
+      // Only clear focus if the focused workflow itself was popped (not when returning to it)
       if (this._userFocusedWorkflowId === frame.workflowId) {
         this._userFocusedWorkflowId = null;
       }
-      this._dagPanel?.onWorkflowPop(frame, workflow);
+      this._dagPanel?.onWorkflowPop(frame, workflow, { preserveView });
       this._stackPanel?.onWorkflowPop(frame, workflow);
       this._blackboardPanel?.onWorkflowPop();
       this._eventsPanel?.onWorkflowPop(frame, workflow);

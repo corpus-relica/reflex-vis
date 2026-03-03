@@ -153,12 +153,18 @@ export class DagPanel extends Panel {
     this._updateBreadcrumb();
   }
 
-  onWorkflowPop(_frame: StackFrame, parentWorkflow: Workflow): void {
+  onWorkflowPop(_frame: StackFrame, parentWorkflow: Workflow, options?: { preserveView?: boolean }): void {
     this._workflowStack.pop();
+    this._updateBreadcrumb();
+
+    if (options?.preserveView && this._currentWorkflowId === parentWorkflow.id) {
+      // Already showing the parent — don't re-render
+      return;
+    }
+
     this._currentWorkflowId = parentWorkflow.id;
     this._activeNodeId = null;
     this.showWorkflow(parentWorkflow);
-    this._updateBreadcrumb();
   }
 
   private _updateBreadcrumb(): void {
