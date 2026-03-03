@@ -121,11 +121,11 @@ export class ReflexDevtools {
       }
     });
 
-    // Stack panel → DAG: click frame switches workflow
+    // Stack panel → DAG: click frame switches workflow view
     this._stackPanel?.events.on('frame-click', ({ workflowId }) => {
-      // Could switch DAG to show that workflow — requires workflow object
-      // For now just expand DAG
-      this._dagPanel?.expand();
+      if (!this._dagPanel) return;
+      this._dagPanel.switchToWorkflow(workflowId);
+      this._dagPanel.expand();
     });
 
     // Blackboard → DAG: click source highlights node

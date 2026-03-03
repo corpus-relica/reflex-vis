@@ -30,6 +30,7 @@ export class DagPanel extends Panel {
   // Per-workflow traversal history (survives workflow push/pop)
   private _visitedNodes = new Map<string, Set<string>>();
   private _traveledEdges = new Map<string, Set<string>>();
+  private _workflowCache = new Map<string, Workflow>();
 
   constructor(container: HTMLElement, options?: PanelOptions) {
     super(container, options);
@@ -84,6 +85,7 @@ export class DagPanel extends Panel {
   }
 
   showWorkflow(workflow: Workflow): void {
+    this._workflowCache.set(workflow.id, workflow);
     this._currentWorkflowId = workflow.id;
     const layout = computeLayout(workflow);
     this._currentLayout = layout;
@@ -218,6 +220,12 @@ export class DagPanel extends Panel {
         this._renderer.setEdgeBlocked(edge.id);
       }
     }
+  }
+
+  switchToWorkflow(workflowId: string): void {
+    const workflow = this._workflowCache.get(workflowId);
+    if (!workflow) return;
+    this.showWorkflow(workflow);
   }
 
   highlightNode(nodeId: string): void {
