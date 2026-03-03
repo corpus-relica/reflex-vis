@@ -21,6 +21,12 @@
       "require": "./dist/cjs/remote.js"
     }
   },
+  "typesVersions": {
+    "*": {
+      "tap": ["dist/types/tap.d.ts"],
+      "remote": ["dist/types/remote.d.ts"]
+    }
+  },
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
