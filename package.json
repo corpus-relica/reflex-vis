@@ -29,7 +29,11 @@
   },
   "devDependencies": {
     "@corpus-relica/reflex": "file:../reflex/typescript",
+    "@types/dagre": "^0.7.54",
     "tsup": "^8.5.0",
     "typescript": "^5.7.0"
+  },
+  "dependencies": {
+    "dagre": "^0.8.5"
   }
 }

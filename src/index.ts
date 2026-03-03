@@ -1,6 +1,7 @@
 import type { ReflexEngine, EngineEvent, EventHandler, Node, Edge, Workflow, BlackboardEntry, StackFrame, EngineSnapshot } from '@corpus-relica/reflex';
 import { embedStyle } from './core/style.js';
 import { resolveTheme, applyTheme, type ThemeOption } from './core/theme.js';
+import { DagPanel } from './panels/dag/dag-panel.js';
 import { StackPanel } from './panels/stack/stack-panel.js';
 import { BlackboardPanel } from './panels/blackboard/blackboard-panel.js';
 import { EventsPanel } from './panels/events/events-panel.js';
@@ -23,6 +24,7 @@ export class ReflexDevtools {
   private _root: HTMLElement | null = null;
   private _disposeStyle: (() => void) | null = null;
 
+  private _dagPanel: DagPanel | null = null;
   private _stackPanel: StackPanel | null = null;
   private _blackboardPanel: BlackboardPanel | null = null;
   private _eventsPanel: EventsPanel | null = null;
@@ -62,11 +64,13 @@ export class ReflexDevtools {
 
     this._root = root;
 
-    // Create panels
+    // Create panels in display order
     const enabled = this._options.panels ?? ['dag', 'stack', 'blackboard', 'events'];
     const collapsed = new Set(this._options.collapsed ?? []);
 
-    // DAG panel placeholder — will be added in future issue
+    if (enabled.includes('dag')) {
+      this._dagPanel = new DagPanel(root, { collapsed: collapsed.has('dag') });
+    }
     if (enabled.includes('stack')) {
       this._stackPanel = new StackPanel(root, { collapsed: collapsed.has('stack') });
     }
@@ -85,17 +89,20 @@ export class ReflexDevtools {
 
     on('node:enter', (payload) => {
       const { node, workflow } = payload as { node: Node; workflow: Workflow };
+      this._dagPanel?.onNodeEnter(node, workflow);
       this._stackPanel?.onNodeEnter(node, workflow);
       this._eventsPanel?.onNodeEnter(node, workflow);
     });
 
     on('node:exit', (payload) => {
       const { node, workflow } = payload as { node: Node; workflow: Workflow };
+      this._dagPanel?.onNodeExit(node, workflow);
       this._eventsPanel?.onNodeExit(node, workflow);
     });
 
     on('edge:traverse', (payload) => {
       const { edge, workflow } = payload as { edge: Edge; workflow: Workflow };
+      this._dagPanel?.onEdgeTraverse(edge, workflow);
       this._eventsPanel?.onEdgeTraverse(edge, workflow);
     });
 
@@ -107,6 +114,7 @@ export class ReflexDevtools {
 
     on('workflow:push', (payload) => {
       const { frame, workflow } = payload as { frame: StackFrame; workflow: Workflow };
+      this._dagPanel?.onWorkflowPush(frame, workflow);
       this._stackPanel?.onWorkflowPush(frame, workflow);
       this._blackboardPanel?.onWorkflowPush();
       this._eventsPanel?.onWorkflowPush(frame, workflow);
@@ -114,6 +122,7 @@ export class ReflexDevtools {
 
     on('workflow:pop', (payload) => {
       const { frame, workflow } = payload as { frame: StackFrame; workflow: Workflow };
+      this._dagPanel?.onWorkflowPop(frame, workflow);
       this._stackPanel?.onWorkflowPop(frame, workflow);
       this._blackboardPanel?.onWorkflowPop();
       this._eventsPanel?.onWorkflowPop(frame, workflow);
@@ -133,9 +142,20 @@ export class ReflexDevtools {
   private _hydrateFromSnapshot(): void {
     try {
       const snap: EngineSnapshot = this._engine.snapshot();
+      this._dagPanel?.update(snap);
       this._stackPanel?.update(snap);
       this._blackboardPanel?.update(snap);
       this._eventsPanel?.update(snap);
+
+      // Show current workflow graph
+      if (snap.currentWorkflowId) {
+        const registry = this._engine as any;
+        // Try to get the workflow for initial DAG rendering
+        const workflow = registry._registry?.get?.(snap.currentWorkflowId);
+        if (workflow && this._dagPanel) {
+          this._dagPanel.showWorkflow(workflow);
+        }
+      }
     } catch {
       // Engine not initialized yet — no snapshot available
     }
@@ -143,12 +163,14 @@ export class ReflexDevtools {
 
   // Programmatic control
   collapse(): void {
+    this._dagPanel?.collapse();
     this._stackPanel?.collapse();
     this._blackboardPanel?.collapse();
     this._eventsPanel?.collapse();
   }
 
   expand(): void {
+    this._dagPanel?.expand();
     this._stackPanel?.expand();
     this._blackboardPanel?.expand();
     this._eventsPanel?.expand();
@@ -164,6 +186,7 @@ export class ReflexDevtools {
 
   private _getPanel(name: PanelName) {
     switch (name) {
+      case 'dag': return this._dagPanel;
       case 'stack': return this._stackPanel;
       case 'blackboard': return this._blackboardPanel;
       case 'events': return this._eventsPanel;
@@ -172,10 +195,11 @@ export class ReflexDevtools {
   }
 
   destroy(): void {
-    // No engine.off() — handlers persist, but we null out references
+    this._dagPanel?.destroy();
     this._stackPanel?.destroy();
     this._blackboardPanel?.destroy();
     this._eventsPanel?.destroy();
+    this._dagPanel = null;
     this._stackPanel = null;
     this._blackboardPanel = null;
     this._eventsPanel = null;
@@ -194,10 +218,15 @@ export { el, text, remove } from './core/dom.js';
 export { Emitter } from './core/emitter.js';
 export { Value } from './core/value.js';
 export { Panel } from './panels/panel.js';
+export { DagPanel } from './panels/dag/dag-panel.js';
 export { StackPanel } from './panels/stack/stack-panel.js';
 export { BlackboardPanel } from './panels/blackboard/blackboard-panel.js';
 export { EventsPanel } from './panels/events/events-panel.js';
+export { computeLayout, clearLayoutCache } from './panels/dag/dag-layout.js';
+export { DagRenderer } from './panels/dag/dag-renderer.js';
+export { Viewport } from './panels/dag/viewport.js';
 export type { PanelOptions } from './panels/panel.js';
 export type { ThemeOption } from './core/theme.js';
 export type { Handler } from './core/emitter.js';
 export type { EqualsFn } from './core/value.js';
+export type { LayoutNode, LayoutEdge, LayoutResult } from './panels/dag/dag-layout.js';

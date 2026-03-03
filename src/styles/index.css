@@ -274,3 +274,96 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* === DAG Panel === */
+.rx-dag_breadcrumb {
+  padding: 2px 6px;
+  font-size: 9px;
+  color: var(--rx-text-muted);
+  border-bottom: 1px solid var(--rx-border);
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.rx-dag_breadcrumb-sep { opacity: 0.5; }
+.rx-dag_breadcrumb-item { cursor: pointer; }
+.rx-dag_breadcrumb-item:hover { color: var(--rx-text); }
+.rx-dag_breadcrumb-item-current { color: var(--rx-text); font-weight: 600; }
+
+.rx-dag_viewport {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  min-height: 0;
+}
+.rx-dag_svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+}
+.rx-dag_svg:active { cursor: grabbing; }
+
+/* Nodes */
+.rx-dag_node { cursor: pointer; }
+.rx-dag_node-bg {
+  fill: var(--rx-bg-panel);
+  stroke: var(--rx-border);
+  stroke-width: 1;
+}
+.rx-dag_node-label {
+  fill: var(--rx-text);
+  font-family: var(--rx-font-mono);
+  font-size: 10px;
+  pointer-events: none;
+}
+.rx-dag_node:hover .rx-dag_node-bg { stroke: var(--rx-text-muted); }
+
+/* Node types */
+.rx-dag_node-terminal .rx-dag_node-bg { stroke-dasharray: 4 2; }
+.rx-dag_node-invocation .rx-dag_node-bg { stroke-width: 2; stroke: var(--rx-event-workflow); }
+
+/* Node states */
+.rx-dag_node-active .rx-dag_node-bg {
+  fill: var(--rx-accent-dim);
+  stroke: var(--rx-accent);
+  stroke-width: 2;
+}
+.rx-dag_node-active .rx-dag_node-label { fill: var(--rx-accent); }
+.rx-dag_node-visited .rx-dag_node-bg {
+  fill: rgba(79, 195, 247, 0.08);
+  stroke: rgba(79, 195, 247, 0.3);
+}
+
+/* Active node pulse */
+@keyframes rx-pulse {
+  0%, 100% { filter: drop-shadow(0 0 2px var(--rx-accent)); }
+  50% { filter: drop-shadow(0 0 6px var(--rx-accent)); }
+}
+.rx-dag_node-active { animation: rx-pulse 1.5s ease-in-out infinite; }
+
+/* Edges */
+.rx-dag_edge {
+  fill: none;
+  stroke: var(--rx-text-muted);
+  stroke-width: 1.5;
+}
+.rx-dag_edge-untraveled {
+  stroke-dasharray: 4 3;
+  opacity: 0.5;
+}
+.rx-dag_edge-active {
+  stroke: var(--rx-accent);
+  stroke-width: 2;
+  stroke-dasharray: none;
+  opacity: 1;
+  marker-end: url(#rx-arrow-active);
+}
+.rx-dag_edge-traveled {
+  stroke: var(--rx-accent);
+  stroke-width: 1.5;
+  stroke-dasharray: none;
+  opacity: 0.7;
+  marker-end: url(#rx-arrow-active);
+}
+.rx-dag_edge-guarded { stroke-dasharray: 6 2 2 2; }
