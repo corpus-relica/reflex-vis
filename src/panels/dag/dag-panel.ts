@@ -27,6 +27,10 @@ export class DagPanel extends Panel {
   private _workflowStack: string[] = [];
   private _activeNodeId: string | null = null;
 
+  // Per-workflow traversal history (survives workflow push/pop)
+  private _visitedNodes = new Map<string, Set<string>>();
+  private _traveledEdges = new Map<string, Set<string>>();
+
   constructor(container: HTMLElement, options?: PanelOptions) {
     super(container, options);
   }
@@ -86,6 +90,7 @@ export class DagPanel extends Panel {
 
     if (this._renderer) {
       this._renderer.render(layout);
+      this._replayTraversalHistory(workflow.id);
       this._minimap?.setLayout(layout);
 
       // Fit after a tick to ensure SVG has dimensions
@@ -107,7 +112,8 @@ export class DagPanel extends Panel {
       this._renderer.setNodeState(this._activeNodeId, 'visited');
     }
 
-    // Activate new node
+    // Record visit and activate
+    this._recordNodeVisit(workflow.id, node.id);
     this._activeNodeId = node.id;
     this._renderer?.setNodeState(node.id, 'active');
   }
@@ -119,9 +125,10 @@ export class DagPanel extends Panel {
     }
   }
 
-  onEdgeTraverse(edge: Edge, _workflow: Workflow): void {
+  onEdgeTraverse(edge: Edge, workflow: Workflow): void {
     if (!this._renderer) return;
     const edgeId = this._renderer.findEdge(edge.from, edge.to) ?? edge.id;
+    this._recordEdgeTraversal(workflow.id, edgeId);
     this._renderer.setEdgeState(edgeId, 'active');
     // Briefly active, then traveled
     setTimeout(() => {
@@ -160,6 +167,37 @@ export class DagPanel extends Panel {
       });
       item.textContent = this._workflowStack[i];
       this._breadcrumb.appendChild(item);
+    }
+  }
+
+  private _recordNodeVisit(workflowId: string, nodeId: string): void {
+    let set = this._visitedNodes.get(workflowId);
+    if (!set) { set = new Set(); this._visitedNodes.set(workflowId, set); }
+    set.add(nodeId);
+  }
+
+  private _recordEdgeTraversal(workflowId: string, edgeId: string): void {
+    let set = this._traveledEdges.get(workflowId);
+    if (!set) { set = new Set(); this._traveledEdges.set(workflowId, set); }
+    set.add(edgeId);
+  }
+
+  private _replayTraversalHistory(workflowId: string): void {
+    if (!this._renderer) return;
+
+    const visited = this._visitedNodes.get(workflowId);
+    if (visited) {
+      for (const nodeId of visited) {
+        // Mark as visited; the active node will be overridden by onNodeEnter
+        this._renderer.setNodeState(nodeId, 'visited');
+      }
+    }
+
+    const traveled = this._traveledEdges.get(workflowId);
+    if (traveled) {
+      for (const edgeId of traveled) {
+        this._renderer.setEdgeState(edgeId, 'traveled');
+      }
     }
   }
 
