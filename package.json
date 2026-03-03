@@ -1,0 +1,35 @@
+{
+  "name": "@corpus-relica/reflex-devtools",
+  "version": "0.1.0",
+  "description": "Developer overlay for visualizing and debugging @corpus-relica/reflex engine state",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/build-css.mjs && tsup",
+    "build:css": "node scripts/build-css.mjs",
+    "build:watch": "tsup --watch",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "peerDependencies": {
+    "@corpus-relica/reflex": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@corpus-relica/reflex": "file:../reflex/typescript",
+    "tsup": "^8.5.0",
+    "typescript": "^5.7.0"
+  }
+}
