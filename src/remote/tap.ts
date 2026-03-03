@@ -76,17 +76,22 @@ export class ReflexDevtoolsTap {
   }
 
   private _sendInit(): void {
-    const engine = this._engine;
-    const snapshot = engine.snapshot();
-    const workflow = engine.currentWorkflow();
+    try {
+      const engine = this._engine;
+      const snapshot = engine.snapshot();
+      const workflow = engine.currentWorkflow();
 
-    const init: DevtoolsInitEvent = {
-      type: 'devtools:init',
-      snapshot,
-      workflow: workflow ? serializeWorkflow(workflow) : undefined,
-      validEdges: this._safeValidEdges(),
-    };
-    this._emit(init);
+      const init: DevtoolsInitEvent = {
+        type: 'devtools:init',
+        snapshot,
+        workflow: workflow ? serializeWorkflow(workflow) : undefined,
+        validEdges: this._safeValidEdges(),
+      };
+      this._emit(init);
+    } catch {
+      // Engine not initialized yet — skip init event.
+      // State will arrive via node:enter once the engine starts.
+    }
   }
 
   private _safeValidEdges(): SerializedEdge[] | undefined {
