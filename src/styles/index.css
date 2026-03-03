@@ -220,6 +220,20 @@
   white-space: nowrap;
 }
 .rx-bb_source:hover { text-decoration: underline; }
+.rx-bb_expand { cursor: pointer; font-size: 8px; margin-right: 2px; }
+.rx-bb_history-row {
+  display: flex;
+  gap: 4px;
+  padding: 1px 6px 1px 20px;
+  font-size: 9px;
+  color: var(--rx-text-muted);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+.rx-bb_history-step { width: 50px; flex-shrink: 0; }
+.rx-bb_history-node { color: var(--rx-accent); cursor: pointer; flex-shrink: 0; width: 70px; }
+.rx-bb_history-node:hover { text-decoration: underline; }
+.rx-bb_history-value { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rx-bb_history-tag { flex-shrink: 0; font-style: italic; }
 
 @keyframes rx-flash {
   0% { background: var(--rx-accent-dim); }
