@@ -1,7 +1,9 @@
 import { defineConfig } from 'tsup';
 
+const entry = ['src/index.ts', 'src/tap.ts', 'src/remote.ts'] as string[];
+
 const shared = {
-  entry: ['src/index.ts'] as string[],
+  entry,
   sourcemap: true,
   dts: false,
   clean: false,
@@ -11,7 +13,7 @@ export default defineConfig([
   { ...shared, format: ['esm'], outDir: 'dist/esm' },
   { ...shared, format: ['cjs'], outDir: 'dist/cjs' },
   {
-    entry: ['src/index.ts'],
+    entry,
     format: ['esm'],
     outDir: 'dist/types',
     dts: { only: true },
