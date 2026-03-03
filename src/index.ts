@@ -13,7 +13,7 @@ export interface DevtoolsOptions {
   container?: HTMLElement;
   panels?: PanelName[];
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
-  height?: number;
+  height?: number | string;
   collapsed?: PanelName[];
   theme?: ThemeOption;
 }
@@ -51,7 +51,8 @@ export class ReflexDevtools {
     applyTheme(root, theme);
 
     if (this._options.height) {
-      root.style.height = `${this._options.height}px`;
+      const h = this._options.height;
+      root.style.height = typeof h === 'number' ? `${h}px` : h;
     }
 
     // Fixed overlay vs embedded
