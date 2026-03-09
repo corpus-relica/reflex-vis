@@ -117,6 +117,14 @@ export class EventsPanel extends Panel {
     this.pushEvent('workflow:pop', 'workflow', workflow.id);
   }
 
+  onStackUnwind(discardedFrames: StackFrame[], targetDepth: number, restoredWorkflow: Workflow): void {
+    this.pushEvent(
+      'stack:unwind',
+      'workflow',
+      `\u21A9 depth=${targetDepth} (${discardedFrames.length} discarded) \u2192 ${restoredWorkflow.id}`,
+    );
+  }
+
   onEngineComplete(_workflow: Workflow): void {
     this.pushEvent('engine:complete', 'engine', 'done');
   }

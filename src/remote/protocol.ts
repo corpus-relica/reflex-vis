@@ -12,6 +12,7 @@ import type {
   Node,
   BlackboardEntry,
   StackFrame,
+  UnwindEvent,
 } from '@corpus-relica/reflex';
 
 // ---------------------------------------------------------------------------
@@ -85,4 +86,5 @@ export type {
   Node,
   BlackboardEntry,
   StackFrame,
+  UnwindEvent,
 };

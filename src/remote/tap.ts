@@ -23,6 +23,7 @@ import type {
   Node,
   BlackboardEntry,
   StackFrame,
+  UnwindEvent,
 } from '@corpus-relica/reflex';
 
 import type {
@@ -174,6 +175,20 @@ export class ReflexDevtoolsTap {
     on('engine:suspend', (payload) => {
       const { reason } = payload as { reason: string };
       this._emit(this._engineEvent('engine:suspend', { reason }));
+    });
+
+    on('stack:unwind', (payload) => {
+      const { discardedFrames, targetDepth, restoredWorkflow, restoredNode, reinvoke } =
+        payload as UnwindEvent;
+      const snapshot = this._engine.snapshot();
+      this._emit(this._engineEvent('stack:unwind', {
+        discardedFrames,
+        targetDepth,
+        restoredWorkflow: serializeWorkflow(restoredWorkflow),
+        restoredNode,
+        reinvoke,
+        currentBlackboard: snapshot.currentBlackboard,
+      }));
     });
 
     on('engine:error', (payload) => {
