@@ -200,6 +200,24 @@ export class RemoteReflexEngine {
         break;
       }
 
+      case 'stack:unwind': {
+        const discardedFrames = payload.discardedFrames as StackFrame[];
+        const restoredWorkflow = payload.restoredWorkflow as unknown as Workflow;
+        const restoredNode = payload.restoredNode as Node;
+        const reinvoke = payload.reinvoke as boolean;
+        const blackboard = payload.currentBlackboard as BlackboardEntry[] | undefined;
+        this._cacheWorkflow(restoredWorkflow);
+        this._currentWorkflow = restoredWorkflow;
+        if (this._snapshot) {
+          this._snapshot.stack.splice(0, discardedFrames.length);
+          this._snapshot.currentWorkflowId = restoredWorkflow.id;
+          this._snapshot.currentNodeId = restoredNode.id;
+          this._snapshot.currentBlackboard = blackboard ?? [];
+          this._snapshot.skipInvocation = !reinvoke;
+        }
+        break;
+      }
+
       case 'engine:complete':
         if (this._snapshot) this._snapshot.status = 'completed';
         break;

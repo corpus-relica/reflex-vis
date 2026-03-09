@@ -110,6 +110,36 @@ export class StackPanel extends Panel {
     this._render();
   }
 
+  onStackUnwind(discardedFrames: StackFrame[], restoredWorkflow: Workflow, restoredNode: Node): void {
+    const discardedIds = new Set(discardedFrames.map(f => f.workflowId));
+
+    // Clear user focus if the focused workflow was discarded
+    if (this._focusedWorkflowId && discardedIds.has(this._focusedWorkflowId)) {
+      this._focusedWorkflowId = null;
+    }
+
+    // Partition entries: discarded move to completed, rest survive
+    const surviving: StackEntry[] = [];
+    for (const entry of this._entries) {
+      if (discardedIds.has(entry.workflowId)) {
+        entry.status = 'completed';
+        entry.order = ++this._orderCounter;
+        this._completedEntries.push(entry);
+      } else {
+        surviving.push(entry);
+      }
+    }
+    this._entries = surviving;
+
+    // Update active entry to restored workflow/node
+    if (this._entries.length > 0) {
+      this._entries[0].workflowId = restoredWorkflow.id;
+      this._entries[0].currentNodeId = restoredNode.id;
+    }
+
+    this._render();
+  }
+
   onEngineSuspend(_reason: string): void {
     // No-op — engine may resume, keep entries live
   }

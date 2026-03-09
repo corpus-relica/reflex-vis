@@ -198,6 +198,29 @@ export class ReflexDevtools {
       this._eventsPanel?.onWorkflowPop(frame, workflow);
     });
 
+    on('stack:unwind' as EngineEvent, (payload) => {
+      const { discardedFrames, targetDepth, restoredWorkflow, restoredNode } =
+        payload as { discardedFrames: StackFrame[]; targetDepth: number;
+                     restoredWorkflow: Workflow; restoredNode: Node; reinvoke: boolean };
+
+      // Clear user focus if the focused workflow was discarded
+      if (this._userFocusedWorkflowId) {
+        const discardedIds = new Set(discardedFrames.map((f: StackFrame) => f.workflowId));
+        if (discardedIds.has(this._userFocusedWorkflowId)) {
+          this._userFocusedWorkflowId = null;
+        }
+      }
+
+      this._stackPanel?.onStackUnwind(discardedFrames, restoredWorkflow, restoredNode);
+      this._eventsPanel?.onStackUnwind(discardedFrames, targetDepth, restoredWorkflow);
+      this._blackboardPanel?.update(this._engine.snapshot());
+
+      // Switch DAG to restored workflow (same pattern as workflow:pop)
+      if (!this._userFocusedWorkflowId && this._dagPanel) {
+        this._dagPanel.switchToWorkflow(restoredWorkflow.id);
+      }
+    });
+
     on('engine:complete', (payload) => {
       const { workflow } = payload as { workflow: Workflow };
       this._stackPanel?.onEngineComplete(workflow);
