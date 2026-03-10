@@ -33,13 +33,18 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "node scripts/build-css.mjs && tsup",
     "build:css": "node scripts/build-css.mjs",
     "build:watch": "tsup --watch",
     "dev": "vite demo",
     "clean": "rm -rf dist",
-    "prepublishOnly": "npm run clean && npm run build"
+    "prepublishOnly": "npm run clean && npm run build",
+    "publish:local": "npm run clean && npm run build && npm publish --registry http://localhost:4873",
+    "publish:remote": "bash scripts/publish-npm.sh"
   },
   "peerDependencies": {
     "@corpus-relica/reflex": ">=1.0.0"
