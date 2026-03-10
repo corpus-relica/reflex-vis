@@ -29,6 +29,7 @@ export class ReflexDevtools {
   private _blackboardPanel: BlackboardPanel | null = null;
   private _eventsPanel: EventsPanel | null = null;
   private _userFocusedWorkflowId: string | null = null;
+  private _userFocusedDepth: number | null = null;
 
   constructor(engine: ReflexEngine, options: DevtoolsOptions = {}) {
     this._engine = engine;
@@ -123,11 +124,13 @@ export class ReflexDevtools {
     });
 
     // Stack panel → DAG: click frame switches workflow view
-    this._stackPanel?.events.on('frame-click', ({ workflowId }) => {
+    this._stackPanel?.events.on('frame-click', ({ workflowId, depth }) => {
       if (!this._dagPanel) return;
-      // If clicking the engine's active workflow, clear user focus (resume auto-follow)
+      // If clicking the engine's active frame (highest depth), clear user focus (resume auto-follow)
       const snap = this._engine.snapshot();
-      this._userFocusedWorkflowId = workflowId === snap.currentWorkflowId ? null : workflowId;
+      const isActiveFrame = depth === (snap.stack?.length ?? 0);
+      this._userFocusedWorkflowId = isActiveFrame ? null : workflowId;
+      this._userFocusedDepth = isActiveFrame ? null : depth;
       this._dagPanel.switchToWorkflow(workflowId);
       this._dagPanel.expand();
     });
@@ -172,6 +175,7 @@ export class ReflexDevtools {
     on('blackboard:write', (payload) => {
       const { entries, workflow } = payload as { entries: BlackboardEntry[]; workflow: Workflow };
       this._blackboardPanel?.onBlackboardWrite(entries, workflow);
+      this._stackPanel?.onBlackboardWrite(entries, workflow);
       this._eventsPanel?.onBlackboardWrite(entries, workflow);
       // Re-evaluate edge viability — blackboard change may affect guard results
       this._updateEdgeViability();
@@ -187,10 +191,16 @@ export class ReflexDevtools {
 
     on('workflow:pop', (payload) => {
       const { frame, workflow } = payload as { frame: StackFrame; workflow: Workflow };
-      const preserveView = this._userFocusedWorkflowId === workflow.id;
-      // Only clear focus if the focused workflow itself was popped (not when returning to it)
-      if (this._userFocusedWorkflowId === frame.workflowId) {
-        this._userFocusedWorkflowId = null;
+      const preserveView = this._userFocusedWorkflowId != null;
+      // Clear focus if the focused depth was the popped entry (top of stack)
+      if (this._userFocusedDepth != null) {
+        const snap = this._engine.snapshot();
+        // The popped frame had depth = stack.length (now stack.length + 1 pre-pop)
+        const poppedDepth = (snap.stack?.length ?? 0) + 1;
+        if (this._userFocusedDepth >= poppedDepth) {
+          this._userFocusedWorkflowId = null;
+          this._userFocusedDepth = null;
+        }
       }
       this._dagPanel?.onWorkflowPop(frame, workflow, { preserveView });
       this._stackPanel?.onWorkflowPop(frame, workflow);
@@ -203,12 +213,10 @@ export class ReflexDevtools {
         payload as { discardedFrames: StackFrame[]; targetDepth: number;
                      restoredWorkflow: Workflow; restoredNode: Node; reinvoke: boolean };
 
-      // Clear user focus if the focused workflow was discarded
-      if (this._userFocusedWorkflowId) {
-        const discardedIds = new Set(discardedFrames.map((f: StackFrame) => f.workflowId));
-        if (discardedIds.has(this._userFocusedWorkflowId)) {
-          this._userFocusedWorkflowId = null;
-        }
+      // Clear user focus if the focused depth is above the restored depth
+      if (this._userFocusedDepth != null && this._userFocusedDepth > targetDepth) {
+        this._userFocusedWorkflowId = null;
+        this._userFocusedDepth = null;
       }
 
       this._stackPanel?.onStackUnwind(discardedFrames, restoredWorkflow, restoredNode);
@@ -235,6 +243,7 @@ export class ReflexDevtools {
 
     on('session:reset' as EngineEvent, () => {
       this._userFocusedWorkflowId = null;
+      this._userFocusedDepth = null;
       this._stackPanel?.resetSession();
       this._hydrateFromSnapshot();
     });
